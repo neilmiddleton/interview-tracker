@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline';">
+  <title>RAFAC Cadet Interview Tracker</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- ── Lock Screen ───────────────────────────────────────────────────── -->
+  <div id="lock-screen">
+    <div class="lock-card">
+      <div class="lock-logo">
+        <div class="roundel">
+          <div class="roundel-ring-1"></div>
+          <div class="roundel-ring-2"></div>
+          <div class="roundel-centre"></div>
+        </div>
+        <div class="lock-title">
+          <span class="lock-rafac">RAFAC</span>
+          <span class="lock-subtitle">Cadet Interview Tracker</span>
+        </div>
+      </div>
+
+      <p class="pin-label">Enter PIN to continue</p>
+      <div class="pin-dots" id="pin-dots">
+        <span></span><span></span><span></span><span></span>
+      </div>
+      <p class="pin-error hidden" id="pin-error">Incorrect PIN. Please try again.</p>
+
+      <div class="pin-pad">
+        <button class="pin-btn" data-digit="1">1</button>
+        <button class="pin-btn" data-digit="2">2</button>
+        <button class="pin-btn" data-digit="3">3</button>
+        <button class="pin-btn" data-digit="4">4</button>
+        <button class="pin-btn" data-digit="5">5</button>
+        <button class="pin-btn" data-digit="6">6</button>
+        <button class="pin-btn" data-digit="7">7</button>
+        <button class="pin-btn" data-digit="8">8</button>
+        <button class="pin-btn" data-digit="9">9</button>
+        <button class="pin-btn pin-clear" id="pin-clear">CLR</button>
+        <button class="pin-btn" data-digit="0">0</button>
+        <button class="pin-btn pin-back" id="pin-back">&#x232B;</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Main App ──────────────────────────────────────────────────────── -->
+  <div id="app" class="hidden">
+
+    <header class="app-header">
+      <div class="header-left">
+        <div class="header-logo-wrap">
+          <img src="../cadet-logo-blue-8f4a99728d.svg" class="header-logo" alt="RAFAC">
+        </div>
+        <span class="header-app-name">Cadet Interview Tracker</span>
+      </div>
+      <div class="header-right">
+        <button class="header-btn" id="btn-templates" title="Interview Templates">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="16" y1="13" x2="8" y2="13"/>
+            <line x1="16" y1="17" x2="8" y2="17"/>
+          </svg>
+          Templates
+        </button>
+        <button class="header-btn" id="btn-settings" title="Settings">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M12 2v2M12 20v2M2 12h2M20 12h2M19.07 19.07l-1.41-1.41M4.93 19.07l1.41-1.41"/>
+          </svg>
+          Settings
+        </button>
+        <button class="header-btn" id="btn-lock" title="Lock application">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+          Lock
+        </button>
+      </div>
+    </header>
+
+    <main id="main-content"></main>
+
+  </div>
+
+  <!-- ── Modal Overlay ─────────────────────────────────────────────────── -->
+  <div id="modal-overlay" class="hidden" role="dialog" aria-modal="true">
+    <div class="modal-backdrop" id="modal-backdrop"></div>
+    <div class="modal-box" id="modal-box"></div>
+  </div>
+
+  <!-- ── Print Area (only visible when printing) ───────────────────────── -->
+  <div id="print-area"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
