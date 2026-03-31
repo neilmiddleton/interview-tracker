@@ -55,7 +55,7 @@
         const date = new Date().toISOString().slice(0, 10);
         const a = document.createElement('a');
         a.href = '/api/backup/download';
-        a.download = `cadet-interviews-backup-${date}.json`;
+        a.download = `cadet-interviews-backup-${date}.db`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -64,17 +64,17 @@
       restore: () => new Promise((resolve) => {
         const input = document.createElement('input');
         input.type = 'file';
-        input.accept = '.json';
+        input.accept = '.db';
         input.onchange = async () => {
           if (!input.files.length) { resolve({ success: false }); return; }
-          const text = await input.files[0].text();
-          let data;
-          try { data = JSON.parse(text); } catch {
-            alert('Invalid backup file — could not parse JSON.');
-            resolve({ success: false });
-            return;
-          }
-          const result = await post('/api/backup/restore', data);
+          const arrayBuffer = await input.files[0].arrayBuffer();
+          const r = await fetch('/api/backup/restore', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/octet-stream' },
+            body: arrayBuffer,
+            credentials: 'same-origin',
+          });
+          const result = await r.json();
           if (result && result.success) {
             setTimeout(() => window.location.reload(), 500);
           } else if (result) {
