@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline';">
   <title>RAFAC Cadet Interview Tracker</title>
   <link rel="stylesheet" href="styles.css">
 </head>
@@ -53,7 +52,7 @@
     <header class="app-header">
       <div class="header-left">
         <div class="header-logo-wrap">
-          <img src="../cadet-logo-blue-8f4a99728d.svg" class="header-logo" alt="RAFAC">
+          <img src="cadet-logo-blue-8f4a99728d.svg" class="header-logo" alt="RAFAC">
         </div>
         <span class="header-app-name">Cadet Interview Tracker</span>
       </div>
@@ -97,6 +96,7 @@
   <!-- ── Print Area (only visible when printing) ───────────────────────── -->
   <div id="print-area"></div>
 
+  <script src="api.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

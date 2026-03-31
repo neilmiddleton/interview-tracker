@@ -1,36 +1,17 @@
 {
   "name": "cadet-interview-tracker",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "RAFAC Air Cadet Interview Tracker",
-  "main": "main.js",
+  "main": "server.js",
   "scripts": {
-    "start": "electron .",
-    "rebuild": "electron-rebuild -f -w better-sqlite3",
-    "postinstall": "node node_modules/electron/install.js && electron-rebuild -f -w better-sqlite3",
-    "build-mac": "electron-builder --mac",
-    "build-win": "electron-builder --win"
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
   },
   "dependencies": {
-    "better-sqlite3": "^11.5.0",
-    "govuk-frontend": "^6.1.0"
-  },
-  "devDependencies": {
-    "electron": "^29.1.6",
-    "electron-builder": "^24.13.3",
-    "electron-rebuild": "^3.2.9"
-  },
-  "build": {
-    "appId": "uk.rafac.cadet-interviews",
-    "productName": "RAFAC Cadet Interview Tracker",
-    "files": [
-      "**/*",
-      "!node_modules/.cache"
-    ],
-    "mac": {
-      "target": "dmg"
-    },
-    "win": {
-      "target": "nsis"
-    }
+    "express": "^4.19.2",
+    "express-session": "^1.18.0",
+    "pg": "^8.11.5"
   }
 }
