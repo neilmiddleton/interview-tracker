@@ -132,6 +132,7 @@ function initDb() {
 
 // ── Middleware ────────────────────────────────────────────────────────────────
 
+app.set('trust proxy', 1); // Fly.io (and most PaaS) terminate TLS at a proxy
 app.use(express.json());
 app.use(session({
   secret: SESSION_SECRET,
