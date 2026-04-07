@@ -433,7 +433,7 @@ async function renderCadet() {
   `;
 
   el('back-btn').addEventListener('click', () => go('dashboard'));
-  el('new-interview-btn').addEventListener('click', () => go('new-interview', { cadetId: cadet.id }));
+  el('new-interview-btn').addEventListener('click', () => go('new-interview', { cadetId: cadet.id, editInterviewId: null }));
   el('rename-btn').addEventListener('click', () => showEditCadetModal(cadet));
   el('delete-cadet-btn').addEventListener('click', () => showDeleteCadetModal(cadet));
   el('export-btn').addEventListener('click', () => printCadetReport(cadet));
