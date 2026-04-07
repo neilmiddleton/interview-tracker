@@ -7,6 +7,46 @@ const state = {
   interviewId: null,
 };
 
+// ── Draft Autosave ────────────────────────────────────────────────────────────
+
+function draftKey() {
+  return `interview_draft_new_${state.cadetId}`;
+}
+
+function saveDraft() {
+  const dateEl = el('iv-date');
+  const interviewerEl = el('iv-interviewer');
+  if (!dateEl || !interviewerEl) return;
+  const questions = Array.from(document.querySelectorAll('.qa-form-item')).map(item => ({
+    question: item.querySelector('.qa-question-input').value,
+    answer:   item.querySelector('.qa-answer-input').value,
+  }));
+  try {
+    localStorage.setItem(draftKey(), JSON.stringify({
+      date: dateEl.value,
+      interviewer: interviewerEl.value,
+      questions,
+    }));
+  } catch (_) {}
+}
+
+function loadDraft() {
+  try {
+    const raw = localStorage.getItem(draftKey());
+    return raw ? JSON.parse(raw) : null;
+  } catch (_) { return null; }
+}
+
+function clearDraft() {
+  try { localStorage.removeItem(draftKey()); } catch (_) {}
+}
+
+let _draftTimer = null;
+function scheduleDraftSave() {
+  clearTimeout(_draftTimer);
+  _draftTimer = setTimeout(saveDraft, 1500);
+}
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function fmt(dateStr) {
   if (!dateStr) return '—';
@@ -619,7 +659,7 @@ async function renderNewInterview() {
 
   el('back-btn').addEventListener('click', () => go('cadet', { cadetId: cadet.id }));
   el('cancel-interview-btn').addEventListener('click', () => go('cadet', { cadetId: cadet.id }));
-  el('add-qa-btn').addEventListener('click', () => addQaRow());
+  el('add-qa-btn').addEventListener('click', () => { addQaRow(); scheduleDraftSave(); });
   el('save-interview-btn').addEventListener('click', saveInterview);
 
   (async () => {
@@ -638,6 +678,7 @@ async function renderNewInterview() {
       if (!tmpl || !tmpl.questions.length) return;
       el('qa-list').innerHTML = '';
       tmpl.questions.forEach(q => addQaRow(q.question, ''));
+      scheduleDraftSave();
       showToast(`Loaded template: ${tmpl.name}`, 'success');
     });
   })();
@@ -661,10 +702,26 @@ async function renderNewInterview() {
     });
   });
 
-  if (isEdit && existing.questions.length) {
-    existing.questions.forEach(q => addQaRow(q.question, q.answer));
+  if (isEdit) {
+    if (existing.questions.length) {
+      existing.questions.forEach(q => addQaRow(q.question, q.answer));
+    } else {
+      addQaRow();
+    }
   } else {
-    addQaRow();
+    const draft = loadDraft();
+    if (draft) {
+      el('iv-date').value = draft.date || today();
+      el('iv-interviewer').value = draft.interviewer || '';
+      (draft.questions || [{ question: '', answer: '' }]).forEach(q => addQaRow(q.question, q.answer));
+      showToast('Draft restored — your unsaved work has been recovered', 'success');
+    } else {
+      addQaRow();
+    }
+    // Autosave on any input change
+    el('iv-date').addEventListener('input', scheduleDraftSave);
+    el('iv-interviewer').addEventListener('input', scheduleDraftSave);
+    el('qa-list').addEventListener('input', scheduleDraftSave);
   }
 }
 
@@ -695,7 +752,7 @@ function addQaRow(prefillQuestion = '', prefillAnswer = '') {
       div.querySelector('.qa-question-input').focus();
     }
   });
-  div.querySelector('.remove-qa').addEventListener('click', () => div.remove());
+  div.querySelector('.remove-qa').addEventListener('click', () => { div.remove(); scheduleDraftSave(); });
   el('qa-list').appendChild(div);
 }
 
@@ -749,6 +806,7 @@ async function saveInterview() {
     btn.disabled = false;
     btn.textContent = 'Save Interview';
     if (result.success) {
+      clearDraft();
       showToast('Interview saved', 'success');
       go('view-interview', { interviewId: result.id });
     }

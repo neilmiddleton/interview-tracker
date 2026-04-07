@@ -125,20 +125,77 @@ function initDb() {
     ]);
   }
 
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS sessions (
+      sid    TEXT PRIMARY KEY,
+      sess   TEXT NOT NULL,
+      expire INTEGER NOT NULL
+    );
+    CREATE INDEX IF NOT EXISTS sessions_expire_idx ON sessions(expire);
+  `);
+
   if (!db.prepare("SELECT value FROM settings WHERE key='pin_hash'").get()) {
     db.prepare("INSERT INTO settings(key,value) VALUES('pin_hash',?)").run(hashPin('0000'));
   }
 }
 
+// ── Session Store ─────────────────────────────────────────────────────────────
+
+class SQLiteStore extends session.Store {
+  constructor() {
+    super();
+    setInterval(() => {
+      db.prepare('DELETE FROM sessions WHERE expire < ?').run(Math.floor(Date.now() / 1000));
+    }, 60_000).unref();
+  }
+
+  get(sid, cb) {
+    try {
+      const row = db.prepare('SELECT sess FROM sessions WHERE sid=? AND expire > ?')
+        .get(sid, Math.floor(Date.now() / 1000));
+      cb(null, row ? JSON.parse(row.sess) : null);
+    } catch (e) { cb(e); }
+  }
+
+  set(sid, sess, cb) {
+    try {
+      const expire = sess.cookie?.expires
+        ? Math.floor(new Date(sess.cookie.expires).getTime() / 1000)
+        : Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60;
+      db.prepare('INSERT OR REPLACE INTO sessions(sid, sess, expire) VALUES(?,?,?)')
+        .run(sid, JSON.stringify(sess), expire);
+      cb(null);
+    } catch (e) { cb(e); }
+  }
+
+  destroy(sid, cb) {
+    try {
+      db.prepare('DELETE FROM sessions WHERE sid=?').run(sid);
+      cb(null);
+    } catch (e) { cb(e); }
+  }
+
+  touch(sid, sess, cb) { this.set(sid, sess, cb); }
+}
+
 // ── Middleware ────────────────────────────────────────────────────────────────
+
+initDb();
 
 app.set('trust proxy', 1); // Fly.io (and most PaaS) terminate TLS at a proxy
 app.use(express.json());
 app.use(session({
+  store: new SQLiteStore(),
   secret: SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
-  cookie: { httpOnly: true, sameSite: 'strict', secure: process.env.NODE_ENV === 'production' },
+  rolling: true,
+  cookie: {
+    httpOnly: true,
+    sameSite: 'strict',
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+  },
 }));
 app.use(express.static(path.join(__dirname, 'renderer')));
 
@@ -415,7 +472,6 @@ app.get('*', (req, res) => {
 
 // ── Start ─────────────────────────────────────────────────────────────────────
 
-initDb();
 app.listen(PORT, '0.0.0.0', () => {
   console.log('\nRAFAC Cadet Interview Tracker');
   console.log(`Running at http://localhost:${PORT}\n`);
